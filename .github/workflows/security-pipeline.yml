@@ -7,7 +7,7 @@ on:
     branches: ["main"]
 
 jobs:
-  tests:
+  security:
     runs-on: ubuntu-latest
 
     steps:
@@ -23,6 +23,43 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          pip install bandit semgrep pip-audit
 
-      - name: Run tests
+      - name: Run unit tests
         run: python -m pytest -v
+
+      - name: Create reports directory
+        run: mkdir -p reports
+
+      - name: Bandit scan
+        run: |
+          bandit -r app/ -f json -o reports/bandit-report.json || true
+
+      - name: Semgrep scan
+        run: |
+          semgrep scan --config security/semgrep/rules.yml \
+            --json --output reports/semgrep-report.json app/
+
+      - name: Dependency scan
+        run: |
+          pip-audit -r requirements.txt \
+            -f json -o reports/dependency-report.json || true
+
+      - name: Build Docker image
+        run: docker build -t vulnfinbot:latest .
+
+      - name: Trivy container scan
+        uses: aquasecurity/trivy-action@0.33.1
+        with:
+          image-ref: vulnfinbot:latest
+          format: json
+          output: reports/trivy-report.json
+          exit-code: "0"
+
+      - name: Upload security reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vulnfinbot-security-reports
+          path: reports/
+          retention-days: 30
