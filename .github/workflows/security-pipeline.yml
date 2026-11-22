@@ -37,13 +37,17 @@ jobs:
 
       - name: Semgrep scan
         run: |
-          semgrep scan --config security/semgrep/rules.yml \
-            --json --output reports/semgrep-report.json app/
+          semgrep scan \
+            --config security/semgrep/rules.yml \
+            --json \
+            --output reports/semgrep-report.json \
+            app/
 
       - name: Dependency scan
         run: |
           pip-audit -r requirements.txt \
-            -f json -o reports/dependency-report.json || true
+            -f json \
+            -o reports/dependency-report.json || true
 
       - name: Build Docker image
         run: docker build -t vulnfinbot:latest .
@@ -64,15 +68,16 @@ jobs:
 
       - name: OWASP ZAP Baseline Scan
         run: |
+          chmod 777 reports
           docker run --rm \
             --network host \
             -v "${{ github.workspace }}/reports:/zap/wrk/:rw" \
             ghcr.io/zaproxy/zaproxy:stable \
             zap-baseline.py \
-            -t http://127.0.0.1:5000 \
+            -t http://127.0.0.1:5000/health \
             -J zap-report.json \
             -I
-            
+
       - name: Upload security reports
         if: always()
         uses: actions/upload-artifact@v4
@@ -80,3 +85,4 @@ jobs:
           name: vulnfinbot-security-reports
           path: reports/
           retention-days: 30
+          if-no-files-found: warn
