@@ -1,0 +1,24 @@
+rules:
+  - id: python-dangerous-eval
+    patterns:
+      - pattern: eval(...)
+    message: "Avoid using eval(). It can execute untrusted code."
+    languages:
+      - python
+    severity: ERROR
+
+  - id: python-dangerous-exec
+    patterns:
+      - pattern: exec(...)
+    message: "Avoid using exec(). It can execute arbitrary Python code."
+    languages:
+      - python
+    severity: ERROR
+
+  - id: python-hardcoded-password
+    patterns:
+      - pattern: password = "..."
+    message: "Possible hardcoded password detected."
+    languages:
+      - python
+    severity: WARNING
