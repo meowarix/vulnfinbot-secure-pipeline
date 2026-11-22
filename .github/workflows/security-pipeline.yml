@@ -1,4 +1,5 @@
-name: Security CI Pipeline
+name: Lab 5 - Secure CI/CD Pipeline
+run-name: Lab 5 - Security fixes
 
 on:
   push:
