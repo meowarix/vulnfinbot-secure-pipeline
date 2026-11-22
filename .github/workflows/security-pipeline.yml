@@ -72,6 +72,7 @@ jobs:
             -t http://127.0.0.1:5000 \
             -J zap-report.json \
             -I
+            
       - name: Upload security reports
         if: always()
         uses: actions/upload-artifact@v4
