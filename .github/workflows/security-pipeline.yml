@@ -55,7 +55,8 @@ jobs:
           format: json
           output: reports/trivy-report.json
           exit-code: "0"
-              - name: Start Flask application
+
+      - name: Start Flask application
         run: |
           nohup python run.py > flask.log 2>&1 &
           sleep 5
